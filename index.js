@@ -191,3 +191,42 @@ console.log(healers.findByName("Stella"));
 // Log the winner of the duel: the adventurer still above 50 health.
 
 robin.duel(healers.findByName("Stella"));
+
+// Part 7: Adventure Forth
+class Inventory {
+  constructor(items) {
+    this.items = items;
+  }
+  getItemCount(item) {
+    return this.items.reduce(
+      (count, currentItem) => count + (currentItem == item ? 1 : 0),
+      0
+    );
+  }
+  getTotalItems() {
+    return this.items.length;
+  }
+  addItem(item) {
+    this.items.push(item);
+  }
+  removeItem(item) {
+    this.items.splice(this.items.indexOf(item), 1);
+  }
+
+  /**
+   * @param {Inventory} tradingPartnerInventory
+   */
+  trade(itemToTrade, itemTradingFor, tradingPartnerInventory) {
+    this.removeItem(itemToTrade);
+    this.addItem(itemTradingFor);
+    tradingPartnerInventory.addItem(itemToTrade);
+    tradingPartnerInventory.removeItem(itemTradingFor);
+  }
+}
+
+const robinsInventory = new Inventory(robin.inventory);
+const franksInventory = new Inventory(frank.inventory);
+console.log(robinsInventory, franksInventory);
+
+robinsInventory.trade("artifact", "sunglasses", franksInventory);
+console.log(robinsInventory, franksInventory);
