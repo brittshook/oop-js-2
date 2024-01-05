@@ -50,6 +50,7 @@ class Character {
   roll(mod = 0) {
     const result = Math.floor(Math.random() * 20) + 1 + mod;
     console.log(`${this.name} rolled a ${result}.`);
+    return result;
   }
 
   /**
@@ -78,20 +79,18 @@ class Character {
 
 class Adventurer extends Character {
   static ROLES = ["Fighter", "Healer", "Wizard"];
-  #companion;
 
   constructor(name, role) {
     super(name);
-    // Adventurers have specialized roles.
+
     if (Adventurer.ROLES.includes(role)) {
       this.role = role;
     } else {
       throw Error(`Role must be 'Fighter', 'Healer', or 'Wizard'.`);
     }
-    // Every adventurer starts with a bed and 50 gold coins.
+
     this.inventory.push("bedroll", "50 gold coins");
   }
-  // Adventurers have the ability to scout ahead of them.
   scout() {
     console.log(`${this.name} is scouting ahead...`);
     super.roll();
@@ -99,13 +98,26 @@ class Adventurer extends Character {
   climb() {
     console.log(`${this.name} is climbing terrain ahead`);
   }
-  attack(character) {
-    console.log(`${this.name} is attacking ${character.name}`);
+  /**
+   * @param {Adventurer} opponent
+   */
+  duel(opponent) {
+    while (this.health > 50 && opponent.health > 50) {
+      const myRoll = super.roll();
+      const opponentRoll = opponent.roll();
+      const loser = myRoll > opponentRoll ? opponent : this;
+      loser.health -= 1;
+      console.log(
+        `${this.name} health: ${this.health} ${opponent.name} health: ${opponent.health}`
+      );
+    }
+    const winner = this.health > 50 ? this.name : opponent.name;
+    console.log(`${winner} wins!`);
   }
 }
 
 // What else should an adventurer be able to do? What other properties should they have?
-// climb, search, attack, add companion (added above, companion on character class)
+// climb, search, add companion (added above, companion on character class)
 
 // Next, create a Companion class with properties and methods specific to the companions.
 // Finally, change the declaration of Robin and the companions to use the new Adventurer and Companion classes.
@@ -139,4 +151,43 @@ console.log(frank);
 // Add a check to the constructor of the Adventurer class that ensures the given role matches one of these values.
 
 console.log(Character.MAX_HEALTH);
-const fail = new Adventurer("Tiffany", "Explorer");
+try {
+  const fail = new Adventurer("Tiffany", "Explorer");
+} catch (err) {
+  console.log(err);
+}
+
+// Part 5: Gather your Party
+
+// Example:
+class AdventurerFactory {
+  constructor(role) {
+    this.role = role;
+    this.adventurers = [];
+  }
+  generate(name) {
+    const newAdventurer = new Adventurer(name, this.role);
+    this.adventurers.push(newAdventurer);
+  }
+  findByIndex(index) {
+    return this.adventurers[index];
+  }
+  findByName(name) {
+    return this.adventurers.find((a) => a.name === name);
+  }
+}
+
+const healers = new AdventurerFactory("Healer");
+const stella = healers.generate("Stella");
+console.log(healers.findByName("Stella"));
+
+// Part 6: Developing Skills
+// Create an additional method, duel(), for the Adventurer class with the following functionality:
+// Accept an Adventurer as a parameter.
+// Use the roll() functionality to create opposing rolls for each adventurer.
+// Subtract 1 from the adventurer with the lower roll.
+// Log the results of this “round” of the duel, including the rolls and current health values.
+// Repeat this process until one of the two adventurers reaches 50 health.
+// Log the winner of the duel: the adventurer still above 50 health.
+
+robin.duel(healers.findByName("Stella"));
